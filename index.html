@@ -117,7 +117,7 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="app_start_date">Available Start Date <span class="required">*</span></label>
-                <input type="text" id="app_start_date" required placeholder="MM / DD / YYYY" inputmode="numeric">
+                <input type="text" id="app_start_date" required placeholder="Immediate / Date" inputmode="numeric">
             </div>
             <div class="form-group">
                 <label for="app_age_check">Are you 18 or older? <span class="required">*</span></label>
@@ -246,19 +246,21 @@
 
         const googleAppUrl = "https://script.google.com/macros/s/AKfycby6hppmeY7izHjz5MYBPFSE6fcMrLqO0mEmkgO2H6gRXwHftCrteMfQwzEsFHVsGcW8Cg/exec";
 
+        // FIXED: Now passes separate, distinct key strings for EVERY question on your form
         const formData = new URLSearchParams();
-        // FIXED: Passes distinct variables for First_Name and Last_Name parameters pipeline
         formData.append('First_Name', document.getElementById('first_name').value);
         formData.append('Last_Name', document.getElementById('last_name').value);
         formData.append('Applicant_Email', document.getElementById('app_email').value);
         formData.append('Applicant_Phone', document.getElementById('app_phone').value);
+        formData.append('Age_Check', document.getElementById('app_age_check').value);
+        formData.append('Start_Date', document.getElementById('app_start_date').value);
+        formData.append('Job_Preference', document.getElementById('app_job_type').value);
         formData.append('Positions_Interested', selectedPositions.join(', '));
-        
-        const packagedNotes = `[Over 18: ${document.getElementById('app_age_check').value}] [Start Date: ${document.getElementById('app_start_date').value}] [Job Schedule: ${document.getElementById('app_job_type').value}] [Shift Times: ${selectedAvailability.join(', ')}] [US Authorized: ${document.getElementById('app_auth').value}] - Past Experience Statement: ${document.getElementById('app_experience').value || 'None listed'}`;
-        
-        formData.append('Experience_Notes', packagedNotes);
+        formData.append('Shift_Availability', selectedAvailability.join(', '));
         formData.append('Desired_Pay', document.getElementById('app_pay').value);
+        formData.append('US_Authorized', document.getElementById('app_auth').value);
         formData.append('Felony_Status', document.querySelector('input[name="felony"]:checked').value);
+        formData.append('Experience_Notes', document.getElementById('app_experience').value || 'None listed');
 
         fetch(googleAppUrl, {
             method: 'POST',
