@@ -36,16 +36,18 @@
         .form-row .form-group { flex: 1; min-width: 200px; padding: 0 10px; margin-bottom: 20px; }
         label { display: block; font-weight: 600; font-size: 10pt; margin-bottom: 6px; color: #111; }
         .required { color: #c00; }
-        input[type="text"], input[type="email"], textarea {
+        input[type="text"], input[type="email"], textarea, select {
             width: 100%;
             padding: 12px;
             border: 1px solid #bbb;
             border-radius: 4px;
             font-size: 11pt;
             font-family: inherit;
+            background-color: #fff;
+            color: #000;
         }
         textarea { resize: vertical; min-height: 100px; }
-        input:focus, textarea:focus { border-color: #000; outline: none; }
+        input:focus, textarea:focus, select:focus { border-color: #000; outline: none; }
         .options-grid { display: flex; flex-direction: column; gap: 10px; padding: 5px 0; }
         .option-item { display: flex; align-items: center; font-size: 10.5pt; }
         .option-item input { margin-right: 10px; transform: scale(1.2); }
@@ -112,8 +114,28 @@
                 <input type="text" id="app_dob" required placeholder="MM / DD / YYYY" inputmode="numeric">
             </div>
             <div class="form-group">
+                <label for="app_age_check">Are you 18 or older? <span class="required">*</span></label>
+                <select id="app_age_check" required>
+                    <option value="">Select...</option>
+                    <option value="Yes">Yes, I am 18 or older</option>
+                    <option value="No">No, I am under 18</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
                 <label for="app_start_date">Available Start Date <span class="required">*</span></label>
                 <input type="text" id="app_start_date" required placeholder="MM / DD / YYYY" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label for="app_job_type">Job Preference <span class="required">*</span></label>
+                <select id="app_job_type" required>
+                    <option value="">Select preference...</option>
+                    <option value="Full-Time">Full-Time Preference</option>
+                    <option value="Part-Time">Part-Time Preference</option>
+                    <option value="Either">Open to Full or Part Time</option>
+                </select>
             </div>
         </div>
 
@@ -130,23 +152,33 @@
         </div>
 
         <div class="form-group">
-            <label>General Availability <span class="required">*</span></label>
+            <label>Shift Availability Constraints <span class="required">*</span></label>
             <div class="options-grid">
                 <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_day" value="Day Shifts"><label for="avail_day">Day Shifts (Lunch Service)</label></div>
                 <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_night" value="Night Shifts"><label for="avail_night">Night Shifts (Dinner Service)</label></div>
                 <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_weekends" value="Weekends"><label for="avail_weekends">Weekends Only</label></div>
-                <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_full" value="Full Time Available"><label for="avail_full">Open Availability (Full Time)</label></div>
+                <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_full" value="Full Availability"><label for="avail_full">Open Availability</label></div>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="app_experience">Tell us about your restaurant experience: <span class="required">*</span></label>
-            <textarea id="app_experience" required placeholder="List past establishments, positions held, or summary of skills..."></textarea>
+            <label for="app_experience">Tell us about your restaurant experience:</label>
+            <textarea id="app_experience" placeholder="List past establishments, positions held, or descriptive job skills..."></textarea>
         </div>
 
-        <div class="form-group">
-            <label for="app_pay">Desired Pay Rate / Hourly Salary <span class="required">*</span></label>
-            <input type="text" id="app_pay" required placeholder="e.g. $12/Hour">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="app_pay">Desired Pay Rate / Hourly Salary <span class="required">*</span></label>
+                <input type="text" id="app_pay" required placeholder="e.g. $12/Hour">
+            </div>
+            <div class="form-group">
+                <label for="app_auth">Legally Authorized to work in US? <span class="required">*</span></label>
+                <select id="app_auth" required>
+                    <option value="">Select...</option>
+                    <option value="Yes">Yes, I am authorized</option>
+                    <option value="No">No, I am not authorized</option>
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -167,13 +199,13 @@
 </div>
 
 <script>
-    // Live phone layout masking text field filter
+    // Live phone mask
     document.getElementById('app_phone').addEventListener('input', function (e) {
         let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
         e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? ' - ' + x[3] : '');
     });
 
-    // Smart Date Input layout formatter engine (MM / DD / YYYY)
+    // Smart input masking logic tracker rules (MM / DD / YYYY)
     function applyDateFormat(elementId) {
         document.getElementById(elementId).addEventListener('input', function (e) {
             let val = e.target.value.replace(/\D/g, '');
@@ -196,7 +228,7 @@
     document.getElementById('preHireForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Loop position checkboxes values
+        // Loop position checkboxes
         const posCheckboxes = document.querySelectorAll('.pos-checkbox');
         let selectedPositions = [];
         posCheckboxes.forEach(cb => { if(cb.checked) selectedPositions.push(cb.value); });
@@ -206,13 +238,13 @@
             return;
         }
 
-        // Loop availability checkboxes values
+        // Loop availability checkboxes
         const availCheckboxes = document.querySelectorAll('.avail-checkbox');
         let selectedAvailability = [];
         availCheckboxes.forEach(cb => { if(cb.checked) selectedAvailability.push(cb.value); });
         
         if (selectedAvailability.length === 0) {
-            alert("Please check at least one choice under your General Availability options.");
+            alert("Please check at least one choice under your Availability options.");
             return;
         }
 
@@ -222,13 +254,17 @@
 
         const googleAppUrl = "https://script.google.com/macros/s/AKfycby6hppmeY7izHjz5MYBPFSE6fcMrLqO0mEmkgO2H6gRXwHftCrteMfQwzEsFHVsGcW8Cg/exec";
 
-        // Map values out to URL parameter strings for data capture script to process
+        // Advanced formatting: Packages extra parameters cleanly into structural script indicators
         const formData = new URLSearchParams();
         formData.append('Applicant_Name', document.getElementById('app_name').value);
         formData.append('Applicant_Email', document.getElementById('app_email').value);
         formData.append('Applicant_Phone', document.getElementById('app_phone').value);
         formData.append('Positions_Interested', selectedPositions.join(', '));
-        formData.append('Experience_Notes', `[DOB: ${document.getElementById('app_dob').value}] [Starts: ${document.getElementById('app_start_date').value}] [Availability: ${selectedAvailability.join(', ')}] - Experience Detail: ${document.getElementById('app_experience').value}`);
+        
+        // Bundles all extra metrics intelligently so you don't lose data context values
+        const packagedNotes = `[DOB: ${document.getElementById('app_dob').value}] [Over 18: ${document.getElementById('app_age_check').value}] [Start Date: ${document.getElementById('app_start_date').value}] [Job Schedule: ${document.getElementById('app_job_type').value}] [Shift Times: ${selectedAvailability.join(', ')}] [US Authorized: ${document.getElementById('app_auth').value}] - Past Experience Statement: ${document.getElementById('app_experience').value || 'None listed'}`;
+        
+        formData.append('Experience_Notes', packagedNotes);
         formData.append('Desired_Pay', document.getElementById('app_pay').value);
         formData.append('Felony_Status', document.querySelector('input[name="felony"]:checked').value);
 
