@@ -32,6 +32,8 @@
         .header h1 { font-size: 22pt; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; }
         .header p { font-size: 11pt; font-style: italic; color: #555; margin: 0; }
         .form-group { margin-bottom: 20px; }
+        .form-row { display: flex; flex-wrap: wrap; margin: 0 -10px; }
+        .form-row .form-group { flex: 1; min-width: 200px; padding: 0 10px; margin-bottom: 20px; }
         label { display: block; font-weight: 600; font-size: 10pt; margin-bottom: 6px; color: #111; }
         .required { color: #c00; }
         input[type="text"], input[type="email"], textarea {
@@ -93,14 +95,26 @@
             <input type="text" id="app_name" required placeholder="First and Last Name">
         </div>
 
-        <div class="form-group">
-            <label for="app_email">Email Address <span class="required">*</span></label>
-            <input type="email" id="app_email" required placeholder="example@gmail.com">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="app_email">Email Address <span class="required">*</span></label>
+                <input type="email" id="app_email" required placeholder="example@gmail.com">
+            </div>
+            <div class="form-group">
+                <label for="app_phone">Phone Number <span class="required">*</span></label>
+                <input type="text" id="app_phone" required placeholder="(270) 555-0199" inputmode="numeric">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="app_phone">Phone Number <span class="required">*</span></label>
-            <input type="text" id="app_phone" required placeholder="(270) 555-0199" inputmode="numeric">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="app_dob">Birthdate <span class="required">*</span></label>
+                <input type="text" id="app_dob" required placeholder="MM / DD / YYYY" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label for="app_start_date">Available Start Date <span class="required">*</span></label>
+                <input type="text" id="app_start_date" required placeholder="MM / DD / YYYY" inputmode="numeric">
+            </div>
         </div>
 
         <div class="form-group">
@@ -116,8 +130,18 @@
         </div>
 
         <div class="form-group">
-            <label for="app_experience">Tell us about your restaurant experience & availability: <span class="required">*</span></label>
-            <textarea id="app_experience" required placeholder="List past work details or schedule constraints..."></textarea>
+            <label>General Availability <span class="required">*</span></label>
+            <div class="options-grid">
+                <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_day" value="Day Shifts"><label for="avail_day">Day Shifts (Lunch Service)</label></div>
+                <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_night" value="Night Shifts"><label for="avail_night">Night Shifts (Dinner Service)</label></div>
+                <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_weekends" value="Weekends"><label for="avail_weekends">Weekends Only</label></div>
+                <div class="option-item"><input type="checkbox" class="avail-checkbox" id="avail_full" value="Full Time Available"><label for="avail_full">Open Availability (Full Time)</label></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="app_experience">Tell us about your restaurant experience: <span class="required">*</span></label>
+            <textarea id="app_experience" required placeholder="List past establishments, positions held, or summary of skills..."></textarea>
         </div>
 
         <div class="form-group">
@@ -143,21 +167,52 @@
 </div>
 
 <script>
-    // Live text formatting input masking rules
+    // Live phone layout masking text field filter
     document.getElementById('app_phone').addEventListener('input', function (e) {
         let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
         e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? ' - ' + x[3] : '');
     });
 
+    // Smart Date Input layout formatter engine (MM / DD / YYYY)
+    function applyDateFormat(elementId) {
+        document.getElementById(elementId).addEventListener('input', function (e) {
+            let val = e.target.value.replace(/\D/g, '');
+            let newVal = '';
+            if (val.length > 4) {
+                newVal += val.substr(0, 2) + ' / ' + val.substr(2, 2) + ' / ';
+                newVal += val.substr(4, 4);
+            } else if (val.length > 2) {
+                newVal += val.substr(0, 2) + ' / ';
+                newVal += val.substr(2, 2);
+            } else {
+                newVal += val;
+            }
+            e.target.value = newVal.substr(0, 14);
+        });
+    }
+    applyDateFormat('app_dob');
+    applyDateFormat('app_start_date');
+
     document.getElementById('preHireForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const checkboxes = document.querySelectorAll('.pos-checkbox');
+        // Loop position checkboxes values
+        const posCheckboxes = document.querySelectorAll('.pos-checkbox');
         let selectedPositions = [];
-        checkboxes.forEach(cb => { if(cb.checked) selectedPositions.push(cb.value); });
+        posCheckboxes.forEach(cb => { if(cb.checked) selectedPositions.push(cb.value); });
         
         if (selectedPositions.length === 0) {
             alert("Please select at least one position you are interested in.");
+            return;
+        }
+
+        // Loop availability checkboxes values
+        const availCheckboxes = document.querySelectorAll('.avail-checkbox');
+        let selectedAvailability = [];
+        availCheckboxes.forEach(cb => { if(cb.checked) selectedAvailability.push(cb.value); });
+        
+        if (selectedAvailability.length === 0) {
+            alert("Please check at least one choice under your General Availability options.");
             return;
         }
 
@@ -165,15 +220,15 @@
         submitBtn.innerText = "Submitting Data... Please Wait...";
         submitBtn.disabled = true;
 
-        // Integrated your live Web App URL connection endpoint securely
         const googleAppUrl = "https://script.google.com/macros/s/AKfycby6hppmeY7izHjz5MYBPFSE6fcMrLqO0mEmkgO2H6gRXwHftCrteMfQwzEsFHVsGcW8Cg/exec";
 
+        // Map values out to URL parameter strings for data capture script to process
         const formData = new URLSearchParams();
         formData.append('Applicant_Name', document.getElementById('app_name').value);
         formData.append('Applicant_Email', document.getElementById('app_email').value);
         formData.append('Applicant_Phone', document.getElementById('app_phone').value);
         formData.append('Positions_Interested', selectedPositions.join(', '));
-        formData.append('Experience_Notes', document.getElementById('app_experience').value);
+        formData.append('Experience_Notes', `[DOB: ${document.getElementById('app_dob').value}] [Starts: ${document.getElementById('app_start_date').value}] [Availability: ${selectedAvailability.join(', ')}] - Experience Detail: ${document.getElementById('app_experience').value}`);
         formData.append('Desired_Pay', document.getElementById('app_pay').value);
         formData.append('Felony_Status', document.querySelector('input[name="felony"]:checked').value);
 
