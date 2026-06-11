@@ -92,9 +92,15 @@
     </div>
 
     <form id="preHireForm">
-        <div class="form-group">
-            <label for="app_name">Full Name <span class="required">*</span></label>
-            <input type="text" id="app_name" required placeholder="First and Last Name">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="first_name">First Name <span class="required">*</span></label>
+                <input type="text" id="first_name" required placeholder="e.g. John">
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name <span class="required">*</span></label>
+                <input type="text" id="last_name" required placeholder="e.g. Smith">
+            </div>
         </div>
 
         <div class="form-row">
@@ -193,13 +199,11 @@
 </div>
 
 <script>
-    // Live phone mask format layout tracker
     document.getElementById('app_phone').addEventListener('input', function (e) {
         let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
         e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? ' - ' + x[3] : '');
     });
 
-    // Date formatting input masking rules (MM / DD / YYYY)
     document.getElementById('app_start_date').addEventListener('input', function (e) {
         let val = e.target.value.replace(/\D/g, '');
         let newVal = '';
@@ -243,12 +247,13 @@
         const googleAppUrl = "https://script.google.com/macros/s/AKfycby6hppmeY7izHjz5MYBPFSE6fcMrLqO0mEmkgO2H6gRXwHftCrteMfQwzEsFHVsGcW8Cg/exec";
 
         const formData = new URLSearchParams();
-        formData.append('Applicant_Name', document.getElementById('app_name').value);
+        // FIXED: Passes distinct variables for First_Name and Last_Name parameters pipeline
+        formData.append('First_Name', document.getElementById('first_name').value);
+        formData.append('Last_Name', document.getElementById('last_name').value);
         formData.append('Applicant_Email', document.getElementById('app_email').value);
         formData.append('Applicant_Phone', document.getElementById('app_phone').value);
         formData.append('Positions_Interested', selectedPositions.join(', '));
         
-        // Fixed: Package layout string containing clean criteria context fields without Birthdate variables
         const packagedNotes = `[Over 18: ${document.getElementById('app_age_check').value}] [Start Date: ${document.getElementById('app_start_date').value}] [Job Schedule: ${document.getElementById('app_job_type').value}] [Shift Times: ${selectedAvailability.join(', ')}] [US Authorized: ${document.getElementById('app_auth').value}] - Past Experience Statement: ${document.getElementById('app_experience').value || 'None listed'}`;
         
         formData.append('Experience_Notes', packagedNotes);
